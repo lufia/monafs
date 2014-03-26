@@ -1,0 +1,26 @@
+referenced:
+	/sys/src/cmd/nntpfs.c
+	/sys/src/cmd/nfs.c
+	/sys/src/cmd/archfs.c
+	/sys/src/cmd/mntgen.c
+	/sys/src/cmd/ip/ftpfs
+	/sys/src/libhtml
+	/sys/src/lib9p
+	http://sx.sakura.ne.jp/~tifille/fusagiko/linktype.html
+	http://dempa.2ch.net/prj/page/browser/
+	http://www.1oku.org/data/about_setting.html
+	http://age.s22.xrea.com/talk2ch/
+
+memo:
+	r->ifcall.uname = username (auth, attach)
+	r->ifcall.aname = ? (auth, attach)
+
+9PFILE: accept service functions
+	attach
+	open
+	create
+	read(not dir)
+	write
+	remove
+	stat
+	wstat

@@ -1,0 +1,154 @@
+monafs 0.1	(2chfs 0.4aと比べて)
+	カテゴリに対応しました。
+
+	ファイル名や構成が変わりました。
+
+	汚なかったキャッシュ用のコードを消しました。
+
+	MonazillaツールのDAT直読みに対応しました。
+
+monafs 0.2
+	サーバとの接続に失敗しても、強制終了しなくなりました。
+
+	echo refresh >ctlで、リロードができるようになりました。
+
+monafs 0.3
+	ファイル名が変わりました。
+		article -> message
+
+	$board/ctlを読んだ時のthreadを追加しました。
+	また、thread/ctlにrankとarticleを追加しました。
+
+	threadrankファイルが無くなりました。
+	同等の機能は、$thread/ctlを読むことで行います。
+		grep rank $thread/ctl | awk '{ print $2 }'
+
+	書き込みに対応しました。
+	エラー処理がいまいちだから、まだ不具合がありそうです。
+
+	書き込み時にはrefererを送らないとだめですから、
+	webfsをrefererに対応させるパッチwebfs.diffを同封しました。
+
+monafs 0.3a
+	postから書き込みフィールドが読めるように変更しました。
+	acme(1)などからpostを開いて書けるようになりました。
+		cat post
+
+	monafs.cで、lock(2)のあと、
+	unlock(2)なくreturnしていたのを修正しました。
+
+	2ch.c:buildthreadで、splitに失敗したら
+	すぐfatalを呼んでいたところを、
+	[broken]で埋めるように変更しました。
+	[/n/2ch/pc/unix/1044900143/69]
+
+	2ch.c:buildboardにも同じようなコードがありますが、
+	そっちはserver busyのエラーを返すように変更しました。
+	というのも、read.cgiを介さずに読むと
+	人多杉にならないと書かれていたのに、理由は分かりませんが、
+	そうなることが何度かあったからです。
+	[http://news6.2ch.net/live.html]
+
+monafs 0.4
+	不要だと思われる書き込みを、
+	キャッシュから破棄するようにしました。
+	単純に、最後に読まれてから
+	時間が経ったものから捨てていきます。
+
+	9p(2)を読むと、なんだかlock()しなくても
+	よさそうだったから、その周りのコードを削りました。
+
+monafs 0.4a
+	node.c:noderefreshで、hostまで開放していたため、
+	次のbuildでエラーになっていた問題を修正しました。
+
+	libkanjiの動作を少し変更しました。
+	半角カナの扱いを、libtcs(半角対応版)と同じに戻しています。
+
+monafs 0.4b
+	cache.c:Pagemaxの値が10024*2になっていたので、
+	間違いというわけでもないですが、1024*2へ変更しました。
+
+	util.c:mestrfreeでfree(m->s)していなかった点を修正しました。
+
+	rc/に、List、Read、monanewsを追加しました。
+
+monafs 0.5
+	キャッシュ監視対象を、レスのみから全体に広げて、
+	不要なファイルを判断するコードも、少し賢くなりました。
+
+	それと関連して、カテゴリ番号がずれるのを防ぐために
+	カテゴリ名を持たせるように変更しました。
+	また、新しく追加されたものがある場合には、
+	それは番号で追加されるようになりました。
+
+monafs 0.5a
+	read時に、たまにp->sがnilになるバグと、
+	subjectやctlなどがキャッシュから落ちた場合に、
+	そのまま消えてしまうバグを修正しました。
+
+	キャッシュ管理も、また少し賢くなりました。
+
+	board/ctlから、thread欄を削除しました。
+
+	-vオプションを追加しました。
+
+monafs 0.5b
+	文字符号を変換できるようになりました。
+	&#1234;のようなものです。
+
+	category以下のファイルと、
+	各ctl, post, subjectファイルが消えてしまう
+	バグが残っていたのを修正しました。
+	原因は、	現在見ているファイルをpとすると、
+	キャッシュから落ちた場合にはp->freeを通して
+	nodefreeが呼ばれ、p->parent->hot = 0されます。
+	そして、次にp->parent->build()が呼ばれた場合に
+	再構築するのですが、上に挙げたファイルは
+	p->parent->parent->build()の実行が必要なのに、
+	p->parent->parent->hotを0にしていなかったのです。
+
+monafs 0.5c
+	文字符号について勘違いしてました。
+	全てが16進数というわけじゃなくて、
+	Cの数値表現と同じで、普通は10進数、
+	&#xcafe;や&#XBABE;が16進数になるそうです。
+
+	rc/のmonanewsをmonacaに名前変更しました。
+	それと、monactを追加しました。
+
+monafs 0.6
+	board/ctlにhost欄を追加しました。
+
+	レス書き込み後、ctlなどが
+	更新されないバグを修正しました。
+
+	[rc1]
+	rc/Read -Nを加えました。
+	最後からN件を表示します。
+
+monafs 0.6a
+	old date: YYYY/MM/DD HH:MM
+	new date: YYYY/MM/DD HH:MM:SS
+
+	カテゴリ名テーブルを別ファイルにしてみました。
+	$home/lib/monafs
+
+	rc/monaurl
+	rc/monapath
+	の2つを加えました。
+
+monafs 0.6b
+	messageの行の前後に付く空白を削るようにしました。
+
+monafs 0.6c
+	日付のBE文字列に対応しました。
+	$article/beが追加されました。
+
+	増えた時に追加するのが面倒だったので、
+	頭からの連番に戻しました。
+	キャッシュから落ちた時の対策も施しました。
+
+	カテゴリ名テーブル($home/lib/monafs)をなくしました。
+
+	$thread/subjectをunhtmlしていなかったバグを修正しました。

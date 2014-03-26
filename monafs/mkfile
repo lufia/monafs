@@ -1,0 +1,18 @@
+</$objtype/mkfile
+
+TARG=monafs
+CFILES=\
+	monafs.c\
+	2ch.c\
+	http.c\
+	node.c\
+	util.c\
+	cache.c\
+	version.c\
+
+OFILES=${CFILES:%.c=%.$O}
+
+HFILES=monafs.h
+
+BIN=$home/bin/$objtype
+</sys/src/cmd/mkone

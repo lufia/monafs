@@ -1,0 +1,27 @@
+#!/bin/rc
+
+rfork e
+
+fn parse {
+	sed 's|^http://[^/]+/||
+		/index\.html$/s///
+		/read\.cgi/s|^test/read\.cgi/||
+		s|/$||
+		s|/| |g' $*
+}
+
+FLAGm=/n/2ch
+
+eval `{aux/getflags m:1 $*}
+
+while(a=`{read | parse}){
+	t=''
+	for(x in $a){
+		if(~ $t '')
+			t=$x
+		if not
+			t=$t/$x
+	}
+	for(x in $FLAGm/*/$t)
+		echo $x
+}

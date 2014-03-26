@@ -1,0 +1,76 @@
+NAME
+	jistorune, sjistorune, ujistorune,
+	runetojis, runetosjis, runetoujis - 漢字コード変換
+
+SYNOPSIS
+	#include <u.h>
+	#include <libc.h>
+	#include <kanji.h>
+
+	int runetojis(char *str, Rune *rune, int *state)
+
+	int runetosjis(char *str, Rune *rune)
+
+	int runetoujis(char *str, Rune *rune)
+
+	int jistorune(Rune *rune, char *str, int *state)
+
+	int sjistorune(Rune *rune, char *str)
+
+	int ujistorune(Rune *rune, char *str)
+
+DESCRIPTION
+	runetojisは、runeの指す文字をISO 2022-JP文字へ変換し
+	strへ格納します。strは最低JISmax個のchar配列です。
+	そうして、コードテーブルの状態をstateに保存し、
+	strへ格納した文字数を返します。
+	最初は、stateの値は0に初期化してください。
+
+	runetosjisとrunetoujisは、ほとんどrunetojisと同じです。
+	違いは、runetosjisはShift_JIS文字を扱うこと、
+	runetoujisはEUC-JP文字を扱うこと、
+	どちらもstate引数が無いことです。
+
+	jistoruneは、strの指すISO 2022-JP文字をrune(6)文字へ変換し
+	それをruneへ格納します。そうして、runetojisと同じように
+	コードテーブルの状態をstateに保存し、
+	runeを表現するために必要なISO 2022-JP文字数を返します。
+	これも最初は、stateの値を0に初期化してください。
+
+	sjistorune, ujistoruneも、jistoruneに似ています。
+	違いは、runetosjis, runetoujisがrunetojisと違う点です。
+
+EXAMPLE
+	ISO-2022-JP文字列をEUC-JP文字列へと変換するコードです。
+
+		state = 0;
+		while(*s){
+			s += jistorune(&c, s, &state);
+			n += runetoujis(buf+n, &rune);
+		}
+		buf[n] = '\0';
+
+	Shift_JIS文字列をISO-2022-JP。
+		state = 0;
+		while(*s){
+			str += sjistorune(&c, str);
+			n += runetojis(buf+n, &c, &state);
+		}
+		if(state)
+			n += runetojis(buf+n, L"", &state);
+		buf[n] = '\0';
+
+SEE ALSO
+	rune(2), rune(6), libtcs(2)
+
+NOTE
+	runeto関数は、strの値が2byte文字の場合負数になるから
+	print(2)ではなくwrite(2)を使うこと。
+
+BUGS
+	jistorune, runetojisの引数が不格好。
+	jistorune:convertのコードが汚ない。
+
+INFO
+	http://p9c.cc.titech.ac.jp/plan9/で公開されているlibtcsを
+	それぞれの漢字コードごとに分けてみました。

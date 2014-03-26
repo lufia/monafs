@@ -1,0 +1,66 @@
+List, Readの使い方
+	monafs+acmeを立ち上げて、ファイル名などが並んでいる場所で
+	ListまたはReadと書いて、マウスを中クリックするだけです。
+	スレッドの中(レス番号が並んでいる場所)にいるならRead、
+	その他ならListを使います。
+
+	Listは、引数が1つあれば、それを含むものだけを表示します。
+	また、Readは、正の引数を1つ与えると、その番号から最後まで、
+	負の引数を1つ与えると、最後からN個、
+	2つ与えると、1つ目の番号から2つ目の番号までを表示します。
+
+	簡単に作ったため、使い勝手はあまりよくないです。
+
+monactの使い方
+	monact [-cr] [-m mtpt] [name ...]
+
+	monafsを使って/n/2ch以下にマウントした後で、
+	% monact
+	とすると、$home/lib/monatimeと比べて
+	新しく立ったスレッドを表示します。
+	そのあと、次のために今回の書き込み数を記録します。
+
+	name引数を与えると、その板だけから調べます。
+	事前に、$home/lib/monatimeに追加しておいてください。
+
+	/n/2ch以外にマウントしたなら、-mオプションを、
+	最新の状態に更新しながら調べる場合は、-rオプションを、
+	ログは書き換えたくない場合は、-cオプションを加えます。
+
+	monatimeのフォーマットは、
+	板名、カテゴリ名、最新スレッド名を、
+	スペースまたはタブで区切って1行に書きます。
+	例はmonatimeにあります。
+
+monacaの使い方
+	monaca [-cr] [-m mtpt]
+
+	以前のレス数と比べて、増加のあったスレッドを調べます。
+	使い方、オプションは、ほとんどmonactと同じです。
+	name引数が無いこと、扱うログファイルが
+	$home/lib/monabookに変わることだけが違います。
+
+	monabookのフォーマットは、
+	:からはじまる行に、(/n/2ch/を除いた)板へのパス、
+	次の行に、スレッドID、書き込み数、サブジェクトを
+	タブで区切って書きます。
+	次の:からはじまる行までは、その板に属するスレッドとします。
+	#からはじまる行はコメントです。
+	例はmonabookにあります。
+
+	なるべく効率が上がるように、中で調整しますから、
+	monabookの並びは好みの順番でいいです。
+
+monaurl, monapathの使い方
+	monaurl [-m mtpt]
+	monapath [-m mtpt]
+
+	% echo /n/2ch/pc/unix | monaurl
+	http://pc5.2ch.net/unix/index.html
+	% echo /n/2ch/pc/unix/1078983739 | monaurl
+	http://pc5.2ch.net/test/read.cgi/unix/1078983739/
+
+	% echo http://pc5.2ch.net/unix/index.html | monapath
+	/n/2ch/pc/unix
+	% echo http://pc5.2ch.net/test/read.cgi/unix/1078983739/ | monapath
+	/n/2ch/pc/unix/1078983739

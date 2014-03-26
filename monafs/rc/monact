@@ -1,0 +1,93 @@
+#!/bin/rc
+
+rfork e
+
+logfile=$home/lib/monatime
+tmpfile=/tmp/monact.$pid
+FLAGm=/n/2ch
+FLAGc=()
+FLAGr=()
+
+fn sigint sighup sigterm {
+	rm -f $tmpfile
+	exit sig
+}
+fn sigexit {
+	rm -f $tmpfile
+}
+fn list {
+	# e.g. pc/unix/9244928193: banana server
+	# this time is very very future
+	ls -p $1 |
+	grep '^(1.........|9........)$' |
+	sort -rn |
+	awk '$0 > '$2
+	#sed '/^'$2'$/,$d'
+}
+fn put {
+	awk 'BEGIN {
+		for(i = 1; i < ARGC; i++){
+			if(i > 1)
+				s = s "\t"
+			s = s ARGV[i]
+		}
+		print s
+	}' $*
+}
+fn tm {
+	date $1 | awk '
+	BEGIN {
+		s = "jan feb mar apr may jun"
+		s = s " jul aug sep oct nov dec"
+		n = split(s, a)
+		for(i = 1; i <= n; i++)
+			mon[a[i]] = i
+	}
+	{	split($4, a, ":")
+		printf("%04d/%02d/%02d %02d:%02d\n",
+			$6, mon[tolower($2)], $3, a[1], a[2])
+	}
+	'
+}
+fn show {
+	sb=$1
+	shift
+	for(i){
+		d=`{tm $i}
+		p=$sb/$i
+		s=`{cat $p/subject}
+		put $s $"d $p
+	}
+}
+
+eval `{aux/getflags crm:1 $*}
+
+x=`{ls $FLAGm | wc -l}
+if(~ $x 0){
+	echo $FLAGm: not mounted
+	exit mount
+}
+
+cat $logfile |
+while(a=`{read}){
+	if(~ $#* 0 || ~ $a(1) $*){
+		b=$FLAGm/$a(2)^/$a(1)
+		if(~ $#FLAGr 1)
+			echo refresh >$b/ctl
+		t=`{list $b $a(3)}
+		switch($#t){
+		case 0
+			n=$a(3)
+		case *
+			n=$t(1)
+			show $b $t
+		}
+		echo $a(1) $a(2) $n >>$tmpfile
+	}
+	if not
+		echo $a >>$tmpfile
+}
+
+if(~ $#FLAGc 1)
+	exit
+mv $tmpfile $logfile

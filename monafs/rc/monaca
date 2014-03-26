@@ -1,0 +1,97 @@
+#!/bin/rc
+
+rfork e
+
+logfile=$home/lib/monabook
+tmpfile=/tmp/monaca.$pid
+FLAGm=/n/2ch
+FLAGc=()
+FLAGr=()
+
+fn sigint sighup sigterm {
+	rm -f $tmpfile
+	exit sig
+}
+fn sigexit {
+	rm -f $tmpfile
+}
+
+eval `{aux/getflags crm:1 $*}
+
+x=`{ls $FLAGm | wc -l}
+if(~ $x 0){
+	echo $FLAGm: not mounted
+	exit mount
+}
+
+grep -v '^(#|[ 	]*$)' $logfile |
+awk '
+BEGIN {
+	FS = OFS = "\t"
+	mtpt = "'$FLAGm'"
+	refresh = '$#FLAGr'
+}
+/^:/ {
+	board = mtpt "/" substr($0, 2)
+	ctl = board "/ctl"
+	if(refresh){
+		print "refresh" >ctl
+		close(ctl)
+	}
+	next
+}
+{	print ++n, board "/" $0 }
+' |
+sort +1 |
+awk '
+BEGIN {
+	FS = OFS = "\t"
+	tmpfile = "'$tmpfile'"
+}
+{	n = 0
+	ctl = $2 "/ctl"
+	while(getline s <ctl > 0){
+		split(s, a, " ")
+		if(a[1] == "article"){
+			n = a[2]+0
+			break
+		}
+	}
+	close(ctl)
+	print $1, $2, n, $4 >>tmpfile
+
+	if(n > $3){
+		d = $3 "+" n-$3
+		print $1, $4, d, $2
+	}
+}
+' |
+sort -n |
+sed 's/[0-9]+	//' || exit bad
+
+if(~ $#FLAGc 1)
+	exit
+
+sort -n $tmpfile |
+awk '
+BEGIN {
+	FS = OFS = "\t"
+	mtpt = "'$FLAGm'"
+}
+{	s = substr($2, length(mtpt)+2)
+	match(s, "[a-zA-Z0-9]+/[^/]+")
+	thread = substr(s, RSTART+RLENGTH+1)
+	s = substr(s, RSTART, RSTART+RLENGTH-1)
+}
+board != s {
+	if(board != "")
+		print ""
+	board = s
+	print ":" board
+}
+$3 >= 1 && $3 <= 1000 { print thread, $3, $4 }
+$3 < 1 || $3 > 1000 {
+	print "drop to dat:", $0 >"/fd/2"
+	print "#" thread, $3, $4
+}
+' >$logfile

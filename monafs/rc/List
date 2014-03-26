@@ -1,0 +1,33 @@
+#!/bin/rc
+
+rfork e
+
+switch($#*){
+case 0
+	expr=.
+case 1
+	expr=$1
+case *
+	echo usage: List [expr] >[1=2]
+	exit usage
+}
+
+switch(`{pwd}){
+case /n/2ch/*/*		# thread list
+	grep rank */ctl |
+	sort +1n |
+	awk -F/ '{
+		f = $1 "/subject"
+		if(getline s <f > 0)
+			printf("%s:%s\n", $1, s)
+		close(f)
+	}' |
+	grep $expr
+case /n/2ch/*		# board list
+	grep $expr */subject |
+	sed 's|^([^/]+)/subject|\1|'
+case /n/2ch			# category list
+	grep $expr */subject |
+	sed 's|^([^/]+)/subject|\1|' |
+	sort -n
+}

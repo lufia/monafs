@@ -1,0 +1,32 @@
+</$objtype/mkfile
+
+LIB=$home/lib/$objtype/libkanji.a
+FILES=\
+	runetojis\
+	runetosjis\
+	runetoujis\
+	jistorune\
+	sjistorune\
+	ujistorune\
+	getk208\
+	k208index\
+
+HFILES=/sys/include/kanji.h
+
+CFILES=${FILES:%=%.c}
+
+OFILES=${FILES:%=%.$O}
+
+UPDATE=mkfile\
+	$LIB\
+	$HFILES\
+	$CFILES\
+
+CLEANFILES=\
+	from\
+	to\
+
+</sys/src/cmd/mksyslib
+
+h:V: kanji.h
+	cp -x $prereq $home/sys/include

@@ -1,0 +1,21 @@
+#!/bin/rc
+
+rfork e
+
+fn host {
+	sed -n '/^host/s/.....//p' $FLAGm/$1/$2/ctl
+}
+
+FLAGm=/n/2ch
+
+eval `{aux/getflags m:1 $*}
+
+while(a=`{read | sed 's|^'$FLAGm'/?||; s|/| |g'})
+	switch($#a){
+	case 2
+		echo http://^`{host $a(1) $a(2)}^/$a(2)^/index.html
+	case 3
+		echo http://^`{host $a(1) $a(2)}^/test/read.cgi/$a(2)^/$a(3)^/
+	case 4 5
+		echo http://^`{host $a(1) $a(2)}^/test/read.cgi/$a(2)^/$a(3)^/$a(4)^/
+	}

@@ -1,0 +1,153 @@
+monafs - モナーファイルシステム
+
+SYNOPSIS
+	monafs [-dv] [-m mtpt] [-s srv]
+
+OPTIONS
+	-d
+		デバッグ文を有効にします。
+
+	-m mtpt
+		mtptをマウントポイントとして使用します。
+		指定がなければ/n/2chを使います。
+
+	-s srv
+
+	-v
+		進行状況をstderrに書き出します。
+
+INSTALL
+	libkanjiが必要です。
+	http://lufia.org/plan9/src/libkanji.tgz
+	を作っておいてください。
+	以下の2つの関数をいじれば、libtcsでも大丈夫です。
+		util.c:sjistostring
+		util.c:Ufmt
+
+	libtcs (半角カナ対応版)
+	[http://p9c.cc.titech.ac.jp/plan9/]
+
+	また、書き込み機能が必要な場合には、
+	webfs(4)をreferer送信に対応させることが必須です。
+	同封のwebfs.diffを当てたものを作成しておいてください。
+
+	準備ができたら、
+	mk
+	mk install
+
+	$home/bin/$objtype以下にインストールされます。
+	それからマウントポイントに/n/2chを使うので、
+	なければそれも作っておいてください。(1 or 2)
+	1.mkdir /n/2ch; chgrp -u sys /n/2ch
+	2.mntgen [/n]
+
+FILES
+	category/ (1からn)
+		subject
+		board/ (例えばunix)
+			ctl
+			post
+			subject
+			thread/ (1029374722)
+				ctl
+				post
+				subject
+				article/ (1から1000)
+					from
+					mail
+					date (YYYY/MM/DD HH:MM:SS)
+					id
+					be
+					message
+
+	全てのsubjectと、from、articleの内容は、
+	実体参照(例えば&lt;&gt;)や文字符号(&#1234;)が、
+	通常の文字(例えば<>)へと変換されます。
+	またmailの内容は、%HH形式の16進コードを
+	それが対応する文字へと変換します。
+
+	dateはタイムゾーンの設定によって変わってきますが、
+	その値はどれも同じ時間を表します。
+	例えばタイムゾーンをJSTに設定すれば、
+	2ちゃんねるに表示される時間と同じ値になります。
+	また、あぼーんや[ここ壊れています]の場合には、
+	1970/01/01 09:00(time=0の時刻)となります。
+
+	ctlへrefreshと書くと、板またはスレッドを読みなおします。
+	また、ctlを読むと、スレッドや板の詳細が入っています。
+	共通して、文字の区切りはスペース(0x20)1つです。
+
+	board/ctl
+		host server.domain.dom
+
+		hostには、その板のあるホスト名が入ります。
+
+	thread/ctl
+		rank XXXX
+		article XXXX
+
+		rankはスレッド一覧の表示順位を持ちます。
+		1が最新(上)で、順に下がっていきます。
+		articleは、そのスレッドに書き込みされたレス数です。
+
+	thread/postへ書くと、それを2chに送ります。
+		from:no name
+		mail:mail address
+		raw text...
+
+		fromは書き込みした人の名前で、mailはメールアドレスです。
+		from:またはmail:が先頭の行のみ、属性と認識されます。
+		それ以外が現れた行以降は、ただのテキストと判断します。
+		from,mailを省略すると、空文字列が補われます。
+
+	thread/postを読むと、書き込みできる属性が見れます。
+		from:
+		mail:
+
+	board/postへは、ほとんどthread/postと同じですが、
+	subject:thread subjectが追加されています。
+
+	日本語文字はUTF-8で書いてください。monafsが変換します。
+	書き込みされた掲示板は、自動的にecho refresh >ctlされます。
+
+	これらは必ず作成されます。
+	内容が無い場合は、空ファイルになっています。
+
+EXTRA
+	rc/以下に、おまけのプログラムを用意してみました。
+	詳しくはrc/READMEを読んでください。
+
+BUGS
+	まちBBSには対応してません。
+
+	postはまだテストが不十分です。
+	特にスレッド作成は、1度もテストしていません。
+	テストのためにスレッド立てるわけにも。。
+
+	バグなどはこちらまで <webmaster@lufia.org>
+
+TODO
+	思いついたものを列挙してみました。
+	上から、簡単そうに思える順です。
+	以前ほど読んでないため、きっと全部は実装しません。
+
+	仕様へ追いつく。
+	* ID:xxxx BE:xxxx
+	* subbbs.cgiの廃止
+
+	埋め込み設定を別ファイルにする。
+	(別ファイルにしなくても、フォームを理解すればいい)
+	* 実体参照テーブル
+	* 書き込み判定文字
+
+	外部板に対応。
+	* まちBBS
+	* したらば、JBBS
+
+	サーバに優しく。
+	* gzip圧縮に対応
+	* If-Modified-Sinceで更新を調べる
+	* 差分だけ読み込む
+
+	●(有料)IDに対応。
+	BE?に対応。

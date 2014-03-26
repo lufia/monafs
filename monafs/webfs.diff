@@ -1,0 +1,27 @@
+diff -e /sys/src/cmd/webfs/client.c webfs/client.c
+222a
+	"referer",			String,	(void*)offsetof(Ctl, referer),
+.
+66a
+	if(c->referer)
+		c->referer = estrdup(c->referer);
+.
+diff -e /sys/src/cmd/webfs/dat.h webfs/dat.h
+19a
+	char *referer;
+.
+diff -e /sys/src/cmd/webfs/http.c webfs/http.c
+193a
+		fprint(2, "<- Referer: %s\n", c->ctl.referer);
+	if(c->ctl.referer)
+		ioprint(io, fd, "Referer: %s\r\n", c->ctl.referer);
+	if(httpdebug)
+.
+diff -e /sys/src/cmd/webfs/main.c webfs/main.c
+20a
+	nil,	/* referer */
+.
+diff -e /sys/src/cmd/webfs/mkfile webfs/mkfile
+2c
+BIN=$home/bin/$objtype
+.

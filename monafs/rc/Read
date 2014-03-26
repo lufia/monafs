@@ -1,0 +1,52 @@
+#!/bin/rc
+
+rfork e
+
+block=50
+
+if(! ~ `{pwd} /n/2ch/*/*){
+	echo must run in thread directory >[1=2]
+	exit bad
+}
+
+fn put {
+	if(~ $#* 2)
+		echo -n $2:
+	cat $1
+	echo
+}
+
+fn show {
+	echo ------- $1 -------
+	put $1/from Name
+	put $1/mail Mail
+	put $1/date Date
+	put $1/message
+	echo
+}
+
+n=`{grep article ctl | awk '{ print $2 }' }
+switch($#*){
+case 0
+	show 1
+	m=`{echo $n - $block + 2 | hoc}
+	if(test $m -lt 2)
+		m=2
+	for(i in `{seq $m $n})
+		show $i
+case 1
+	m=$1
+	if(~ $m -*){
+		m=`{echo $n + $m + 1 | hoc}
+		if(test $m -lt 1)
+			m=1
+	}
+	for(i in `{seq $m $n})
+		show $i
+case 2
+	for(i in `{seq $1 $2})
+		show $i
+case *
+	echo usage: Read [n] >[1=2]
+	exit usage
+}
